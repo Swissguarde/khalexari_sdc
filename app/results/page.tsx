@@ -27,7 +27,7 @@ export default function ResultsPage() {
   const criticalPoints = JSON.parse(searchParams.get("criticalPoints") || "[]");
 
   return (
-    <div className="p-12 pt-24 min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-black text-white">
+    <div className="p-12 pt-24 min-h-screen bg-gradient-to-br from-gray-800 via-gray-800 to-gray-700 text-white">
       <div className="flex items-center mb-12">
         <Link
           href="/"
