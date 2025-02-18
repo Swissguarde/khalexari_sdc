@@ -2,6 +2,7 @@
 
 import FormModal from "@/app/components/form-modal";
 import { motion } from "framer-motion";
+import FramesModal from "./components/frames-modal";
 
 export default function HomePage() {
   return (
@@ -71,7 +72,7 @@ export default function HomePage() {
           className="text-center"
         >
           <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
-            BEAM ANALYSIS
+            STRUCTURAL ANALYSIS
           </h1>
           <motion.p
             initial={{ opacity: 0 }}
@@ -84,7 +85,10 @@ export default function HomePage() {
             students.
           </motion.p>
 
-          <FormModal />
+          <div className="flex gap-6 items-center justify-center">
+            <FormModal />
+            <FramesModal />
+          </div>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}

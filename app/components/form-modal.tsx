@@ -203,7 +203,7 @@ export default function FormModal() {
           size="lg"
           className="bg-white text-gray-900 hover:bg-white/90 transition-all"
         >
-          Start Calculation
+          Beams Calculation
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[725px] max-h-[90vh] overflow-y-auto">

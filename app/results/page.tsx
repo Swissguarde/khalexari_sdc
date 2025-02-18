@@ -27,11 +27,11 @@ export default function ResultsPage() {
   const criticalPoints = JSON.parse(searchParams.get("criticalPoints") || "[]");
 
   return (
-    <div className="p-12 min-h-screen bg-gradient-to-br from-gray-800 via-gray-800 to-gray-700 text-white">
-      <div className="flex items-center mb-8">
+    <div className="p-12 pt-24 min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-black text-white">
+      <div className="flex items-center mb-12">
         <Link
           href="/"
-          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
+          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-white/5 hover:bg-white/10 backdrop-blur-lg rounded-lg transition-colors border border-white/10"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -49,40 +49,35 @@ export default function ResultsPage() {
           </svg>
           Back to Calculator
         </Link>
-        <h2 className="text-4xl font-bold flex-1 text-center">Results</h2>
-        <div className="invisible">
-          <Link
-            href="/"
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
-          >
-            Back to Calculator
-          </Link>
-        </div>
+        <h2 className="text-4xl font-bold flex-1 text-center bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">
+          Results
+        </h2>
+        <div className="w-[140px]"></div>
       </div>
-      <div className="space-y-6">
-        <div className="p-4 bg-gray-700/50 border border-gray-600 rounded-lg">
+      <div className="space-y-8">
+        <div className="p-6 bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl">
           <h2 className="text-xl font-semibold mb-4">Fixed End Moments</h2>
           <div className="space-y-2">
             {results.map((result: FixedEndMomentResults) => (
               <div
                 key={result.spanLabel}
-                className="border-b border-gray-600 pb-4"
+                className="border-b border-white/10 pb-4"
               >
                 <p>Span {result.spanLabel}:</p>
                 <p className="pl-4">
                   FEM{result.spanLabel}: {result.startMoment.toFixed(2)}{" "}
-                  <span className="text-sm text-green-400">KNM</span>
+                  <span className="text-sm text-green-400">kN⋅m</span>
                 </p>
                 <p className="pl-4">
                   FEM{result.spanLabel.split("").reverse().join("")}:{" "}
                   {result.endMoment.toFixed(2)}{" "}
-                  <span className="text-sm text-green-400">KNM</span>
+                  <span className="text-sm text-green-400">kN⋅m</span>
                 </p>
               </div>
             ))}
           </div>
         </div>
-        <div className="p-4 bg-gray-700/50 border border-gray-600 rounded-lg">
+        <div className="p-6 bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl">
           <h3 className="text-xl font-semibold mb-4">
             Slope Deflection Equations
           </h3>
@@ -93,7 +88,7 @@ export default function ResultsPage() {
               return (
                 <div
                   key={eq.spanLabel}
-                  className="border-b border-gray-600 pb-4"
+                  className="border-b border-white/10 pb-4"
                 >
                   <p>Span {eq.spanLabel}:</p>
                   <div className="pl-4 space-y-2">
@@ -116,7 +111,7 @@ export default function ResultsPage() {
           </div>
         </div>
         {boundaryCondition && (
-          <div className="p-4 bg-gray-700/50 border border-gray-600 rounded-lg">
+          <div className="p-6 bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl">
             <h3 className="text-xl font-semibold mb-4">Boundary Conditions</h3>
             <div className="space-y-2">
               <p className="pl-4">θB = {boundaryCondition.thetaB.toFixed(6)}</p>
@@ -130,32 +125,32 @@ export default function ResultsPage() {
           </div>
         )}
         {finalMoments && Object.keys(finalMoments).length > 0 && (
-          <div className="p-4 bg-gray-700/50 border border-gray-600 rounded-lg">
+          <div className="p-6 bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl">
             <h3 className="text-xl font-semibold mb-4">Final Moments</h3>
             <div className="space-y-2">
               {Object.entries(finalMoments).map(([key, value]) => (
                 <p key={key} className="pl-4">
                   {key} = <span className="font-bold">{value.toFixed(2)}</span>{" "}
-                  <span className="text-sm text-green-400">KNM</span>
+                  <span className="text-sm text-green-400">kN⋅m</span>
                 </p>
               ))}
             </div>
           </div>
         )}
         {reactions && Object.keys(reactions).length > 0 && (
-          <div className="p-4 bg-gray-700/50 border border-gray-600 rounded-lg">
+          <div className="p-6 bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl">
             <h3 className="text-xl font-semibold mb-4">Support Reactions</h3>
             <div className="space-y-2">
               {Object.entries(reactions).map(([key, value]) => (
                 <p key={key} className="pl-4">
                   {key} = <span className="font-bold">{value.toFixed(2)}</span>{" "}
-                  <span className="text-sm text-green-400">KN</span>
+                  <span className="text-sm text-green-400">kN</span>
                 </p>
               ))}
             </div>
           </div>
         )}
-        <div className="p-4 bg-gray-700/50 border border-gray-600 rounded-lg">
+        <div className="p-6 bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl">
           <h3 className="text-xl font-semibold mb-4">
             Bending Moments and Shear Forces
           </h3>
@@ -163,9 +158,9 @@ export default function ResultsPage() {
             {criticalPoints?.map((span: SpanCriticalPoints) => (
               <div
                 key={span.spanLabel}
-                className="border border-gray-600 rounded-lg overflow-hidden"
+                className="border border-white/10 rounded-lg overflow-hidden"
               >
-                <div className="bg-gray-600 px-4 py-2">
+                <div className="bg-white/5 px-4 py-2">
                   <p className="font-semibold">Span {span.spanLabel}</p>
                 </div>
                 <div className="p-4">
@@ -179,7 +174,7 @@ export default function ResultsPage() {
                       key={index}
                       className={`grid grid-cols-3 gap-4 py-2 ${
                         index !== span.criticalPoints.length - 1
-                          ? "border-b border-gray-600"
+                          ? "border-b border-white/10"
                           : ""
                       }`}
                     >
@@ -188,13 +183,13 @@ export default function ResultsPage() {
                         <span className="font-bold">
                           {point.bendingMoment.toFixed(2)}
                         </span>{" "}
-                        <span className="text-sm text-green-400">KNm</span>
+                        <span className="text-sm text-green-400">kN⋅m</span>
                       </div>
                       <div>
                         <span className="font-bold">
                           {point.shearForce.toFixed(2)}
                         </span>{" "}
-                        <span className="text-sm text-green-400">KN</span>
+                        <span className="text-sm text-green-400">kN</span>
                       </div>
                     </div>
                   ))}
