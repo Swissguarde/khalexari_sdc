@@ -1,9 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
@@ -11,25 +8,20 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  CalculatorFormData,
-  FixedEndMomentResults,
-  SlopeDeflectionEquation,
-  Span,
-} from "../types/calculator";
-import {
-  Solution,
-  solveSimultaneousEquations,
-} from "../utils/boundaryCondition";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { CalculatorFormData, Span } from "../types/calculator";
+import { solveSimultaneousEquations } from "../utils/boundaryCondition";
 import { calculateBMSF } from "../utils/calculateBMSF";
 import { calculateFinalMoments } from "../utils/calculateFinalMoments";
 import { calculateReactions } from "../utils/calculateReactions";
 import { calculateFixedEndMoments } from "../utils/calculations";
-import { SpanCriticalPoints, extractCriticalBMSF } from "../utils/criticalBMSF";
-import { generateSlopeDeflectionEquations } from "../utils/slopeDeflection";
+import { extractCriticalBMSF } from "../utils/criticalBMSF";
 import { LOAD_TYPES } from "../utils/loadTypes";
+import { generateSlopeDeflectionEquations } from "../utils/slopeDeflection";
 import SpanInputs from "./span-inputs";
-import { Label } from "@/components/ui/label";
 
 export default function FormModal() {
   const router = useRouter();
@@ -40,22 +32,6 @@ export default function FormModal() {
     spans: [],
     sinkingSupports: [],
   });
-  const [results, setResults] = useState<FixedEndMomentResults[]>([]);
-  const [slopeDeflectionEquations, setSlopeDeflectionEquations] = useState<
-    SlopeDeflectionEquation[]
-  >([]);
-  const [boundaryCondition, setBoundaryCondition] = useState<Solution>({
-    thetaB: 0,
-    thetaC: 0,
-    thetaD: 0,
-  });
-  const [finalMoments, setFinalMoments] = useState<{ [key: string]: number }>(
-    {}
-  );
-  const [reactions, setReactions] = useState<{ [key: string]: number }>({});
-  const [criticalPoints, setCriticalPoints] = useState<SpanCriticalPoints[]>(
-    []
-  );
 
   const [isFormValid, setIsFormValid] = useState(false);
 
