@@ -1,4 +1,4 @@
-import { Column, Beam } from "../types/frames";
+import { Column, Beam } from "../types/frameTypes";
 import { FrameFinalMoments } from "./framesFinalMoments";
 import { FrameReactions } from "./frameReactions";
 
@@ -101,14 +101,13 @@ export const calculateBeamBMSF = (
   const bendingMoment: number[] = [];
   const shearForce: number[] = [];
 
-  // Get start reaction (RA)
   const startReaction = verticalReactions.RA || 0;
 
   if (beam.loadType === "UDL") {
-    // Calculate at start and end points
-    const points = [0, beamLength];
-
-    points.forEach((xi) => {
+    // Create more points to form a smooth parabola
+    const numPoints = 20; // Increased number of points for smoother curve
+    for (let i = 0; i <= numPoints; i++) {
+      const xi = (i / numPoints) * beamLength;
       x.push(Number(xi.toFixed(2)));
 
       // Calculate shear force: Fx = RA - w*x
@@ -119,26 +118,6 @@ export const calculateBeamBMSF = (
       const Mx =
         startReaction * xi + startMoment - loadMagnitude * xi * (xi / 2);
       bendingMoment.push(Number(Mx.toFixed(2)));
-    });
-
-    // Add maximum bending moment point if it exists
-    const maxBMPosition = startReaction / loadMagnitude;
-    if (maxBMPosition > 0 && maxBMPosition < beamLength) {
-      x.push(Number(maxBMPosition.toFixed(2)));
-      shearForce.push(0);
-      const maxBM =
-        startReaction * maxBMPosition +
-        startMoment -
-        loadMagnitude * maxBMPosition * (maxBMPosition / 2);
-      bendingMoment.push(Number(maxBM.toFixed(2)));
-
-      // Sort arrays based on x positions
-      const sortedIndices = x.map((_, i) => i).sort((a, b) => x[a] - x[b]);
-      x.sort((a, b) => a - b);
-      const sortedBM = sortedIndices.map((i) => bendingMoment[i]);
-      const sortedSF = sortedIndices.map((i) => shearForce[i]);
-      bendingMoment.splice(0, bendingMoment.length, ...sortedBM);
-      shearForce.splice(0, shearForce.length, ...sortedSF);
     }
   } else if (beam.loadType === "POINT_AT_DISTANCE") {
     const a = pointLoadDistances?.a || 0; // Distance from left end
@@ -181,44 +160,47 @@ export const calculateBeamBMSF = (
       shearForce.splice(0, shearForce.length, ...sortedSF);
     }
   } else if (beam.loadType === "CENTER_POINT") {
-    const center = beamLength / 2; // Center point of the beam
+    const centerPoint = beamLength / 2;
 
-    // Calculate positions
-    const points = [0, center, beamLength]; // Start, center point, end
-    points.forEach((xi) => {
+    // Section 1: Before the center point load
+    const section1Points = [0, centerPoint];
+    section1Points.forEach((xi) => {
       x.push(Number(xi.toFixed(2)));
 
-      // Calculate shear force
-      const Fx = xi < center ? startReaction : startReaction - loadMagnitude;
+      // Calculate shear force before load
+      const Fx = startReaction;
       shearForce.push(Number(Fx.toFixed(2)));
 
-      // Calculate bending moment
-      const Mx =
-        xi < center
-          ? startReaction * xi + startMoment
-          : startReaction * xi + startMoment - loadMagnitude * (xi - center);
+      // Calculate bending moment before load
+      const Mx = startReaction * xi + startMoment;
       bendingMoment.push(Number(Mx.toFixed(2)));
     });
 
-    // Add maximum bending moment point if it exists
-    const maxBMPosition = startReaction / loadMagnitude;
-    if (maxBMPosition > 0 && maxBMPosition < beamLength) {
-      x.push(Number(maxBMPosition.toFixed(2)));
-      shearForce.push(0);
-      const maxBM =
-        startReaction * maxBMPosition +
-        startMoment -
-        loadMagnitude * (maxBMPosition - center);
-      bendingMoment.push(Number(maxBM.toFixed(2)));
+    // Section 2: After the center point load
+    const section2Points = [centerPoint, beamLength];
+    section2Points.forEach((xi) => {
+      // Don't add centerPoint again as it's already added
+      if (xi !== centerPoint) {
+        x.push(Number(xi.toFixed(2)));
+      }
 
-      // Sort arrays based on x positions
-      const sortedIndices = x.map((_, i) => i).sort((a, b) => x[a] - x[b]);
-      x.sort((a, b) => a - b);
-      const sortedBM = sortedIndices.map((i) => bendingMoment[i]);
-      const sortedSF = sortedIndices.map((i) => shearForce[i]);
-      bendingMoment.splice(0, bendingMoment.length, ...sortedBM);
-      shearForce.splice(0, shearForce.length, ...sortedSF);
-    }
+      // Calculate shear force after load
+      const Fx = startReaction - loadMagnitude;
+      shearForce.push(Number(Fx.toFixed(2)));
+
+      // Calculate bending moment after load
+      const Mx =
+        startReaction * xi + startMoment - loadMagnitude * (xi - centerPoint);
+      bendingMoment.push(Number(Mx.toFixed(2)));
+    });
+
+    // Ensure points are sorted by x position
+    const sortedIndices = x.map((_, i) => i).sort((a, b) => x[a] - x[b]);
+    x.sort((a, b) => a - b);
+    const sortedBM = sortedIndices.map((i) => bendingMoment[i]);
+    const sortedSF = sortedIndices.map((i) => shearForce[i]);
+    bendingMoment.splice(0, bendingMoment.length, ...sortedBM);
+    shearForce.splice(0, shearForce.length, ...sortedSF);
   }
 
   return {

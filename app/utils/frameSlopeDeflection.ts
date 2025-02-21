@@ -1,4 +1,4 @@
-import { Beam, Column } from "../types/frames";
+import { Beam, Column } from "../types/frameTypes";
 
 export interface FrameSlopeDeflectionEquation {
   memberLabel: string;

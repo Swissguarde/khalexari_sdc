@@ -63,7 +63,8 @@ export const generateFrameShearEquation = (
       ? `(${c2Equations.startEquation} + ${
           c2Equations.endEquation
         }${c2CenterPointTerm})/${h2.toFixed(2)}`
-      : `(${c2Equations.endEquation})/${h2.toFixed(2)}`;
+      : `(${c2Equations.startEquation})/${h2.toFixed(2)}`;
+  console.log(column2Component);
 
   const totalLoadMagnitude =
     (columns[0]?.loadType !== "NONE" ? c1LoadMagnitude : 0) +
@@ -185,16 +186,23 @@ const solveFrameEquationsWithThetaD = (
         const isNegative = cleanTerm.startsWith("-");
         const coeff = parseFloat(cleanTerm) || (isNegative ? -1 : 1);
 
-        if (term.includes("EIθB")) thetaB = coeff;
-        else if (term.includes("EIθC")) thetaC = coeff;
-        else if (term.includes("EIθD")) thetaD = coeff;
-        else if (term.includes("EIδ")) delta = coeff;
-        else rightNum -= coeff;
+        if (term.includes("EIθB")) {
+          thetaB = isNegative ? -Math.abs(coeff) : coeff;
+        } else if (term.includes("EIθC")) {
+          thetaC = isNegative ? -Math.abs(coeff) : coeff;
+        } else if (term.includes("EIθD")) {
+          thetaD = isNegative ? -Math.abs(coeff) : coeff;
+        } else if (term.includes("EIδ")) {
+          delta = isNegative ? -Math.abs(coeff) : coeff;
+        } else {
+          rightNum -= coeff;
+        }
       });
 
       return [thetaB, thetaC, thetaD, delta, rightNum];
     };
 
+    // Solve 4x4 matrix
     const matrix = [
       parseEquation(boundaryEq1, true),
       parseEquation(boundaryEq2, true),
@@ -202,47 +210,57 @@ const solveFrameEquationsWithThetaD = (
       parseEquation(shearEq, false),
     ];
 
-    const n = matrix.length;
-    for (let i = 0; i < n; i++) {
-      let maxRow = i;
-      for (let k = i + 1; k < n; k++) {
-        if (Math.abs(matrix[k][i]) > Math.abs(matrix[maxRow][i])) {
-          maxRow = k;
-        }
-      }
-
-      if (maxRow !== i) {
-        [matrix[i], matrix[maxRow]] = [matrix[maxRow], matrix[i]];
-      }
-
-      const pivot = matrix[i][i];
-      if (Math.abs(pivot) < 1e-10) {
-        throw new Error("No unique solution exists");
-      }
-
-      for (let j = i; j <= 4; j++) {
-        matrix[i][j] /= pivot;
-      }
-
-      for (let k = 0; k < n; k++) {
-        if (k !== i) {
-          const factor = matrix[k][i];
-          for (let j = i; j <= 4; j++) {
-            matrix[k][j] -= factor * matrix[i][j];
-          }
-        }
-      }
+    // Check matrix condition
+    const determinant = calculateDeterminant(matrix);
+    if (Math.abs(determinant) < 1e-10) {
+      console.warn("Warning: Matrix may be ill-conditioned");
     }
 
-    return {
-      thetaB: Number(matrix[0][4].toFixed(4)),
-      thetaC: Number(matrix[1][4].toFixed(4)),
-      thetaD: Number(matrix[2][4].toFixed(4)),
-      delta: Number(matrix[3][4].toFixed(4)),
-    };
+    const solution = solveMatrix(matrix, 4);
+
+    return solution;
   } catch (error: any) {
-    throw new Error(`Failed to solve equations: ${error.message}`);
+    console.error("Error in solveFrameEquationsWithThetaD:", error);
+    throw new Error(`Failed to solve equations with θD: ${error.message}`);
   }
+};
+
+// Add helper function to calculate determinant for 4x4 matrix
+const calculateDeterminant = (matrix: number[][]): number => {
+  const n = matrix.length;
+  if (n !== 4) return 0;
+
+  let det = 0;
+  for (let i = 0; i < 4; i++) {
+    det += matrix[0][i] * getCofactor(matrix, 0, i);
+  }
+  return det;
+};
+
+const getCofactor = (matrix: number[][], row: number, col: number): number => {
+  const subMatrix: number[][] = [];
+  for (let i = 1; i < 4; i++) {
+    const tempRow: number[] = [];
+    for (let j = 0; j < 4; j++) {
+      if (j !== col) {
+        tempRow.push(matrix[i][j]);
+      }
+    }
+    if (tempRow.length > 0) {
+      subMatrix.push(tempRow);
+    }
+  }
+
+  const sign = col % 2 === 0 ? 1 : -1;
+  return sign * determinant3x3(subMatrix);
+};
+
+const determinant3x3 = (matrix: number[][]): number => {
+  return (
+    matrix[0][0] * (matrix[1][1] * matrix[2][2] - matrix[1][2] * matrix[2][1]) -
+    matrix[0][1] * (matrix[1][0] * matrix[2][2] - matrix[1][2] * matrix[2][0]) +
+    matrix[0][2] * (matrix[1][0] * matrix[2][1] - matrix[1][1] * matrix[2][0])
+  );
 };
 
 const solveFrameEquationsWithoutThetaD = (
@@ -282,52 +300,73 @@ const solveFrameEquationsWithoutThetaD = (
       return [thetaB, thetaC, delta, rightNum];
     };
 
+    // Solve 3x3 matrix
     const matrix = [
       parseEquation(boundaryEq1, true),
       parseEquation(boundaryEq2, true),
       parseEquation(shearEq, false),
     ];
 
-    const n = matrix.length;
-    for (let i = 0; i < n; i++) {
-      let maxRow = i;
-      for (let k = i + 1; k < n; k++) {
-        if (Math.abs(matrix[k][i]) > Math.abs(matrix[maxRow][i])) {
-          maxRow = k;
-        }
-      }
+    const solution = solveMatrix(matrix, 3);
+    return {
+      ...solution,
+      thetaD: 0,
+    };
+  } catch (error: any) {
+    throw new Error(`Failed to solve equations without θD: ${error.message}`);
+  }
+};
 
-      if (maxRow !== i) {
-        [matrix[i], matrix[maxRow]] = [matrix[maxRow], matrix[i]];
-      }
+// Helper function to solve matrix using Gaussian elimination
+const solveMatrix = (matrix: number[][], size: number): EquationSolution => {
+  const n = matrix.length;
 
-      const pivot = matrix[i][i];
-      if (Math.abs(pivot) < 1e-10) {
-        throw new Error("No unique solution exists");
-      }
-
-      for (let j = i; j <= 3; j++) {
-        matrix[i][j] /= pivot;
-      }
-
-      for (let k = 0; k < n; k++) {
-        if (k !== i) {
-          const factor = matrix[k][i];
-          for (let j = i; j <= 3; j++) {
-            matrix[k][j] -= factor * matrix[i][j];
-          }
-        }
+  // Gaussian elimination
+  for (let i = 0; i < n; i++) {
+    let maxRow = i;
+    for (let k = i + 1; k < n; k++) {
+      if (Math.abs(matrix[k][i]) > Math.abs(matrix[maxRow][i])) {
+        maxRow = k;
       }
     }
 
+    if (maxRow !== i) {
+      [matrix[i], matrix[maxRow]] = [matrix[maxRow], matrix[i]];
+    }
+
+    const pivot = matrix[i][i];
+    if (Math.abs(pivot) < 1e-10) {
+      throw new Error("No unique solution exists");
+    }
+
+    for (let j = i; j <= size; j++) {
+      matrix[i][j] /= pivot;
+    }
+
+    for (let k = 0; k < n; k++) {
+      if (k !== i) {
+        const factor = matrix[k][i];
+        for (let j = i; j <= size; j++) {
+          matrix[k][j] -= factor * matrix[i][j];
+        }
+      }
+    }
+  }
+
+  if (size === 4) {
+    return {
+      thetaB: Number(matrix[0][4].toFixed(4)),
+      thetaC: Number(matrix[1][4].toFixed(4)),
+      thetaD: Number(matrix[2][4].toFixed(4)),
+      delta: Number(matrix[3][4].toFixed(4)),
+    };
+  } else {
     return {
       thetaB: Number(matrix[0][3].toFixed(4)),
       thetaC: Number(matrix[1][3].toFixed(4)),
       thetaD: 0,
       delta: Number(matrix[2][3].toFixed(4)),
     };
-  } catch (error: any) {
-    throw new Error(`Failed to solve equations: ${error.message}`);
   }
 };
 
