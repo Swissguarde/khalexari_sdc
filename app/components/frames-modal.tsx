@@ -15,7 +15,7 @@ import { useEffect, useState } from "react";
 import { Beam, Column } from "../types/frameTypes";
 import { calculateFrameFixedEndMoments } from "../utils/femFrames";
 import { calculateBeamBMSF, calculateColumnBMSF } from "../utils/frameBMSF";
-import { getFrameBoundaryEquations } from "../utils/frameBoundaryCondition";
+import { generalFrameEquation } from "../utils/frameBoundaryCondition";
 import {
   calculateFrameHorizontalReactions,
   calculateFrameVerticalReactions,
@@ -139,7 +139,7 @@ export default function FramesModal() {
     );
 
     // Get boundary equations
-    const boundaryEquations = getFrameBoundaryEquations(
+    const boundaryEquations = generalFrameEquation(
       slopeDeflectionEquations,
       hasHingeOrRoller
     );
@@ -158,14 +158,16 @@ export default function FramesModal() {
     const solution = solveFrameEquations(
       boundaryEquations?.eq1 || "",
       boundaryEquations?.eq2 || "",
-      boundaryEquations?.eq3 || "",
+      boundaryEquations?.eq3 || null,
       simplifiedShearEquation.simplifiedEquation
     );
 
     const finalMoments = calculateFrameFinalMoments(
       slopeDeflectionEquations,
+      formData.columns,
       solution.thetaB,
       solution.thetaC,
+      solution.thetaD,
       solution.delta,
       1 // Since we're working with EI terms directly
     );
