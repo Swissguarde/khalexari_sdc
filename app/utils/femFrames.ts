@@ -1,4 +1,4 @@
-import { ColumnSupportType } from "../types/frames";
+import { ColumnSupportType } from "../types/frameTypes";
 
 interface FrameMember {
   length: number;
