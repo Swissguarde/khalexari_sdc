@@ -370,25 +370,56 @@ export default function FramesResultsPage() {
                     Beam {index + 1}
                   </h4>
                   <div className="space-y-4">
-                    {bmsf.x.map((x, i) => (
-                      <div key={i} className="space-y-2">
-                        <div className="text-white/70">
-                          At x = {x.toFixed(2)} m:
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-white/70">Shear Force:</span>
-                          <span className="font-mono font-medium">
-                            {bmsf.shearForce[i].toFixed(2)} kN
-                          </span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-white/70">Bending Moment:</span>
-                          <span className="font-mono font-medium">
-                            {bmsf.bendingMoment[i].toFixed(2)} kN⋅m
-                          </span>
-                        </div>
-                      </div>
-                    ))}
+                    {/* Only display first and last points for UDL */}
+                    {bmsf.x.length === 21
+                      ? // UDL case - show only start and end points
+                        [0, bmsf.x.length - 1].map((i) => (
+                          <div key={i} className="space-y-2">
+                            <div className="text-white/70">
+                              At x = {bmsf.x[i].toFixed(2)} m:
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="text-white/70">
+                                Shear Force:
+                              </span>
+                              <span className="font-mono font-medium">
+                                {bmsf.shearForce[i].toFixed(2)} kN
+                              </span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="text-white/70">
+                                Bending Moment:
+                              </span>
+                              <span className="font-mono font-medium">
+                                {bmsf.bendingMoment[i].toFixed(2)} kN⋅m
+                              </span>
+                            </div>
+                          </div>
+                        ))
+                      : // For other load types, show all points
+                        bmsf.x.map((x, i) => (
+                          <div key={i} className="space-y-2">
+                            <div className="text-white/70">
+                              At x = {x.toFixed(2)} m:
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="text-white/70">
+                                Shear Force:
+                              </span>
+                              <span className="font-mono font-medium">
+                                {bmsf.shearForce[i].toFixed(2)} kN
+                              </span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="text-white/70">
+                                Bending Moment:
+                              </span>
+                              <span className="font-mono font-medium">
+                                {bmsf.bendingMoment[i].toFixed(2)} kN⋅m
+                              </span>
+                            </div>
+                          </div>
+                        ))}
                   </div>
                 </ResultCard>
               ))}

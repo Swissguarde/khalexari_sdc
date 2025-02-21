@@ -8,9 +8,9 @@ export default function FrameBendingMomentDiagram({
   results,
 }: FrameBendingMomentDiagramProps) {
   // SVG dimensions and scaling
-  const svgHeight = 600;
-  const svgWidth = 800;
-  const margin = { top: 40, right: 60, bottom: 40, left: 60 };
+  const svgHeight = 700;
+  const svgWidth = 1000;
+  const margin = { top: 60, right: 80, bottom: 60, left: 80 };
 
   // Frame dimensions
   const frameWidth = svgWidth - margin.left - margin.right;
@@ -97,11 +97,11 @@ export default function FrameBendingMomentDiagram({
   };
 
   return (
-    <div className="flex justify-center items-center space-y-8 mt-8">
-      <div className="border-t border-white/20 pt-8 w-full max-w-3xl">
-        <h3 className="text-xl font-bold text-white/90 mb-6 flex items-center gap-2">
+    <div className="space-y-6">
+      <div className="border-b border-white/10 pb-4">
+        <h3 className="text-2xl font-semibold text-white/90 flex items-center gap-3">
           <svg
-            className="w-6 h-6"
+            className="w-7 h-7 text-blue-400"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -116,60 +116,83 @@ export default function FrameBendingMomentDiagram({
           Bending Moment Diagram
         </h3>
       </div>
-      <div className="backdrop-blur-sm p-4 rounded-lg w-full max-w-3xl">
+      <div className="bg-gray-900/50 backdrop-blur-sm rounded-xl p-6 shadow-lg">
         <svg width={svgWidth} height={svgHeight}>
-          {/* Frame centerlines */}
+          {/* Grid lines */}
+          {Array.from({ length: 10 }, (_, i) => (
+            <g key={`grid-${i}`}>
+              <line
+                x1={margin.left}
+                y1={margin.top + (frameHeight * i) / 9}
+                x2={svgWidth - margin.right}
+                y2={margin.top + (frameHeight * i) / 9}
+                stroke="rgba(255,255,255,0.1)"
+                strokeWidth="1"
+              />
+              <line
+                x1={margin.left + (frameWidth * i) / 9}
+                y1={margin.top}
+                x2={margin.left + (frameWidth * i) / 9}
+                y2={svgHeight - margin.bottom}
+                stroke="rgba(255,255,255,0.1)"
+                strokeWidth="1"
+              />
+            </g>
+          ))}
+
+          {/* Frame centerlines with updated style */}
           <line
             x1={leftColumnX}
             y1={svgHeight - margin.bottom}
             x2={leftColumnX}
             y2={beamY}
-            stroke="white"
-            strokeWidth="1"
-            strokeDasharray="4 4"
+            stroke="rgba(255,255,255,0.3)"
+            strokeWidth="1.5"
+            strokeDasharray="6 4"
           />
           <line
             x1={rightColumnX}
             y1={svgHeight - margin.bottom}
             x2={rightColumnX}
             y2={beamY}
-            stroke="white"
-            strokeWidth="1"
-            strokeDasharray="4 4"
+            stroke="rgba(255,255,255,0.3)"
+            strokeWidth="1.5"
+            strokeDasharray="6 4"
           />
           <line
             x1={leftColumnX}
             y1={beamY}
             x2={rightColumnX}
             y2={beamY}
-            stroke="white"
-            strokeWidth="1"
-            strokeDasharray="4 4"
+            stroke="rgba(255,255,255,0.3)"
+            strokeWidth="1.5"
+            strokeDasharray="6 4"
           />
 
-          {/* Column bending moment diagrams */}
+          {/* Updated diagram styles */}
           <path
             d={generateColumnPath(0)}
-            fill="hsl(200, 70%, 50%, 0.2)"
-            stroke="hsl(200, 70%, 50%)"
+            fill="rgba(56, 189, 248, 0.15)"
+            stroke="rgb(56, 189, 248)"
             strokeWidth="2"
+            className="filter drop-shadow-md"
           />
           <path
             d={generateColumnPath(1)}
-            fill="hsl(200, 70%, 50%, 0.2)"
-            stroke="hsl(200, 70%, 50%)"
+            fill="rgba(56, 189, 248, 0.15)"
+            stroke="rgb(56, 189, 248)"
             strokeWidth="2"
+            className="filter drop-shadow-md"
           />
-
-          {/* Beam bending moment diagram */}
           <path
             d={generateBeamPath()}
-            fill="hsl(200, 70%, 50%, 0.2)"
-            stroke="hsl(200, 70%, 50%)"
+            fill="rgba(56, 189, 248, 0.15)"
+            stroke="rgb(56, 189, 248)"
             strokeWidth="2"
+            className="filter drop-shadow-md"
           />
 
-          {/* Moment values */}
+          {/* Updated text styles */}
           {results.columnBMSF.map((column, colIndex) =>
             column.sections.flatMap((section, sectionIndex) =>
               section.bendingMoment.map((moment, i) => {
@@ -186,8 +209,10 @@ export default function FrameBendingMomentDiagram({
                     }
                     y={svgHeight - margin.bottom - height - 10}
                     textAnchor={moment >= 0 ? "start" : "end"}
-                    fill="white"
-                    fontSize="12"
+                    fill="rgba(255,255,255,0.9)"
+                    fontSize="13"
+                    fontWeight="500"
+                    className="filter drop-shadow"
                   >
                     {moment.toFixed(1)} kNm
                   </text>
@@ -196,19 +221,31 @@ export default function FrameBendingMomentDiagram({
             )
           )}
 
-          {/* Beam moment values */}
-          {results.beamBMSF[0].bendingMoment.map((moment, i) => (
-            <text
-              key={`beam-moment-${i}`}
-              x={leftColumnX + results.beamBMSF[0].x[i] * beamLengthScale + 5}
-              y={beamY + moment * beamMomentScale + (moment >= 0 ? 15 : -5)}
-              textAnchor="start"
-              fill="white"
-              fontSize="12"
-            >
-              {moment.toFixed(1)} kN
-            </text>
-          ))}
+          {results.beamBMSF[0].bendingMoment.map((moment, i) => {
+            const x = results.beamBMSF[0].x[i];
+
+            // Only show labels for start, end, and maximum moment points
+            if (
+              x === 0 || // Start point
+              x === results.beamBMSF[0].x[results.beamBMSF[0].x.length - 1] || // End point
+              Math.abs(moment) ===
+                Math.max(...results.beamBMSF[0].bendingMoment.map(Math.abs)) // Max moment point
+            ) {
+              return (
+                <text
+                  key={`beam-moment-${i}`}
+                  x={leftColumnX + x * beamLengthScale + 5}
+                  y={beamY + moment * beamMomentScale + (moment >= 0 ? 15 : -5)}
+                  textAnchor="start"
+                  fill="white"
+                  fontSize="12"
+                >
+                  {moment.toFixed(1)} kN⋅m
+                </text>
+              );
+            }
+            return null;
+          })}
         </svg>
       </div>
     </div>

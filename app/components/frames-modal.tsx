@@ -280,10 +280,10 @@ export default function FramesModal() {
 
           <Button
             type="submit"
-            className="w-full py-6 text-lg font-semibold bg-gradient-to-r from-blue-500 via-purple-500 to-blue-500 hover:from-blue-600 hover:via-purple-600 hover:to-blue-600 transition-all duration-300 ease-in-out transform hover:scale-[1.02] hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed rounded-xl text-white"
+            className="w-full bg-gradient-to-r from-gray-600 via-gray-800 to-gray-700 text-white"
             disabled={!isFormValid}
           >
-            Calculate Frame
+            SUBMIT
           </Button>
         </form>
       </DialogContent>
