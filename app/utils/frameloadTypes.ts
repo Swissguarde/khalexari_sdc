@@ -17,12 +17,9 @@ export const FRAME_BEAM_LOAD_TYPE_LABELS = {
 export const FRAME_FRAME_LOAD_TYPES = {
   CENTER_POINT: "center-point",
   NONE: "none",
-  POINT_AT_DISTANCE: "point-at-distance",
 } as const;
 
 export const FRAME_FRAME_LOAD_TYPE_LABELS = {
   [FRAME_BEAM_LOAD_TYPES.CENTER_POINT]: "Point load at center",
   [FRAME_BEAM_LOAD_TYPES.NONE]: "No Load",
-  [FRAME_BEAM_LOAD_TYPES.POINT_AT_DISTANCE]:
-    "Point load at distance 'a' from left end and 'b' from the right end",
 } as const;
